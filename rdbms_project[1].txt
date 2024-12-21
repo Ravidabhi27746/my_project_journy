@@ -1,0 +1,157 @@
+
+----------------------------------------bank system-----------------------------------------------------------------------
+
+-----------------------------------bank_accounts table---------------------------------------------------------------------------------------
+  CREATE TABLE bank_accounts(
+    account_id   NUMBER(12) check(length(account_id)=12),
+    account_name VARCHAR2(100),
+    balance NUMBER(10, 2) check(balance>0)
+   );
+ alter table bank_accounts add constraint acc_unique primary key(account_id);
+
+---------------------------------bank account backup dta table----------------------------------------------------------------
+create table bank_backup(account_id   NUMBER(12),account_name varchar2(100),
+    balance NUMBER(10, 2) check(balance>0),now_date date);
+
+
+------------------------------------back system project in packege specification----------------------------------------------------------
+
+CREATE OR REPLACE PACKAGE bank_system_pkg is
+
+    PROCEDURE add_account(account_id IN NUMBER, account_name IN VARCHAR2,balance IN NUMBER);
+    
+    PROCEDURE delete_account(id IN NUMBER);
+
+    procedure update_bank(id IN NUMBER,name IN VARCHAR2);
+    
+    FUNCTION get_balance(id IN NUMBER) RETURN NUMBER;
+END bank_system_pkg;
+/
+
+
+
+-----------------------------------------back system project in packege body-------------------------------------------------------------
+CREATE OR REPLACE PACKAGE BODY bank_system_pkg AS
+
+  PROCEDURE add_account(account_id IN NUMBER, account_name IN VARCHAR2, balance IN NUMBER) IS
+  BEGIN
+      INSERT INTO bank_accounts (account_id, account_name, balance) VALUES (account_id, account_name, balance);
+      COMMIT;
+
+      dbms_output.put_line('Data successfully entered into the database.');
+  
+  EXCEPTION
+      WHEN value_error THEN
+          dbms_output.put_line('Please enter a valid bank account number.');
+      WHEN dup_val_on_index THEN
+          dbms_output.put_line('Please enter a unique bank account number.');
+      WHEN OTHERS THEN
+          dbms_output.put_line('An unexpected error occurred: ' || SQLERRM);
+  END add_account;
+
+  PROCEDURE delete_account(id IN NUMBER) IS
+  BEGIN
+      DELETE FROM bank_accounts WHERE account_id = id;
+      
+      IF SQL%ROWCOUNT > 0 THEN
+          dbms_output.put_line('Account deleted successfully.');
+      ELSE
+          dbms_output.put_line('No account found with the given ID.');
+      END IF;
+
+      COMMIT; 
+  EXCEPTION
+      WHEN OTHERS THEN
+          dbms_output.put_line('An unexpected error occurred: ' || SQLERRM);
+  END delete_account;
+
+  PROCEDURE update_bank(id IN NUMBER, name IN VARCHAR2) IS
+  BEGIN
+      UPDATE bank_accounts 
+      SET account_name = name 
+      WHERE account_id = id;
+
+      IF SQL%ROWCOUNT > 0 THEN
+          dbms_output.put_line('Account updated successfully.');
+      ELSE
+          dbms_output.put_line('No account found with the given ID to update.');
+      END IF;
+
+      COMMIT;  
+  EXCEPTION
+      WHEN OTHERS THEN
+          dbms_output.put_line('An unexpected error occurred: ' || SQLERRM);
+  END update_bank;
+
+  FUNCTION get_balance(id IN NUMBER) RETURN NUMBER IS
+        v_balance NUMBER;
+    BEGIN
+        SELECT balance INTO v_balance FROM bank_accounts
+        WHERE account_id = id;
+        RETURN v_balance;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RAISE_APPLICATION_ERROR(-20004, 'Account not found');
+        WHEN OTHERS THEN
+            RAISE_APPLICATION_ERROR(-20005, 'Error retrieving balance: ' || SQLERRM);
+    END get_balance;
+
+END bank_system_pkg;
+/
+
+
+------------------------------------------back system in backup data trigger-----------------------------------------
+CREATE OR REPLACE TRIGGER bank_backup
+BEFORE INSERT
+ON bank_accounts
+FOR EACH ROW
+BEGIN
+    INSERT INTO bank_backup (account_id, account_name, balance,now_date)
+    VALUES (:new.account_id, :new.account_name, :new.balance, to_date(SYSDATE,'dd//mm/yy hh24:mi:ss'));
+   
+END;
+/
+
+
+----------------------------------------main code of bank system project--------------------------------------------------
+
+set serveroutput on
+declare
+acc_id number(12);
+acc_name varchar2(100);
+acc_balance number(10);
+get_balan number(10);
+choice number(1):=&num;
+begin
+dbms_output.put_line('1.add new account');
+dbms_output.put_line('2.delete account');
+dbms_output.put_line('3.update account');
+dbms_output.put_line('4.get account balance');
+ if choice=1 then 
+ acc_id:=787856785634;
+ acc_name:='ravi dabhi';
+ acc_balance:=54000;
+ bank_system_pkg.add_account(acc_id,acc_name,acc_balance);
+ elsif choice=2 then
+ acc_id:=787856785634;
+ bank_system_pkg.delete_account(acc_id);
+ elsif choice=3 then
+ acc_id:=787856785634;
+ acc_name:='dabhi_ravi';
+ bank_system_pkg.update_bank(acc_id,acc_name);
+ elsif choice=4 then
+ acc_id:=787856785634;
+ get_balan:=bank_system_pkg.get_balance(acc_id);
+ dbms_output.put_line('this account balance is:'||get_balan);
+ end if;
+ end;
+
+
+
+
+
+
+
+
+
+
