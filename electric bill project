@@ -1,0 +1,111 @@
+#include<conio.h>
+#include<stdio.h>
+#include<math.h>
+
+int main()
+ {
+
+    char customerName[100];
+
+    int customerID;
+
+
+
+    float pr,cr,I=1;
+    float uunit;
+
+
+    int ec,fc;
+    char date[40];
+
+    float totala;
+
+    printf("Enter Customer Name:");
+    gets(customerName);
+
+    printf("Enter Customer ID  : ");
+    scanf("%d", &customerID);
+
+    printf("enter date (dd-mm-yy) :");
+    scanf("%s",date);
+
+    printf("Enter previous reading(Miter reading):");
+    scanf("%f", &pr);
+
+
+    printf("enter current reading(Miter reading):");
+    scanf("%f",&cr);
+
+    if(pr>cr)
+
+    {   printf("please change previous reading and current reading\n");
+    }
+    else {
+
+        uunit=cr-pr;
+
+        if(uunit<=50)
+        {   ec=305;
+            fc=15;
+        }
+
+        else if(uunit>=50 && uunit<150)
+        {   ec=350;
+            fc=25;
+        }
+
+        else if(uunit>=150 && uunit<250 )
+        {   ec=415;
+            fc=45;
+        }
+
+        else if(uunit>=250 )
+        {   ec=520;
+            fc=90;
+        }
+
+        printf("energy charge=%d\n", ec);
+        printf("fixed charge =%d\n",fc);
+        printf("total charge=%d\n",ec+fc);
+
+
+        totala=(uunit*7.1)+ec+fc;
+        printf("\n\n");
+
+
+
+
+
+
+        printf("\n           Electric Bill\n");
+
+        for(I=1; I<=17; I++) {
+            printf("* ");
+        }
+
+        printf("\n");
+
+        printf("\t\t\t\t*");
+        printf("\n*");
+        printf(" Customer Name: %s\n", customerName);
+        printf("\t\t\t\t*");
+        printf("\n*");
+        printf(" Customer ID: %d\n", customerID);
+        printf("\t\t\t\t*");
+        printf("\n*");
+        printf(" user enter date:%s\n",date);
+        printf("\t\t\t\t*");
+        printf("\n*");
+        printf(" Units Consumed: %.2f units\n", uunit);
+        printf("\t\t\t\t*");
+        printf("\n*");
+        printf(" Total amount: %.2f₹\n", totala);
+        printf("\t\t\t\t*");
+    }
+    printf("\n* ");
+    for(I=1; I<=16; I++) {
+        printf("* ");
+    }
+
+    return 0;
+}
